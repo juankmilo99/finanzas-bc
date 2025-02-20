@@ -8,7 +8,10 @@ const options = {
       version: '1.0.0',
       description: 'Documentación de la API para gestionar finanzas personales',
     },
-    servers: [{ url: 'http://localhost:5000/api' }],
+    servers: [
+      { url: 'https://finanzas-bc.onrender.com/api' },
+      { url: 'http://localhost:5000/api' } 
+    ],
     components: {
       securitySchemes: {
         bearerAuth: {  
