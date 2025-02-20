@@ -26,6 +26,12 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(cors({
+  origin: ["http://localhost:3000", "https://tu-dominio-en-produccion.com"], // Permitir solo estos dominios
+  credentials: true, // 🔥 Permitir cookies y headers de autenticación
+  methods: ["GET", "POST", "PUT", "DELETE"], // Métodos permitidos
+  allowedHeaders: ["Content-Type", "Authorization"], // Headers permitidos
+}));
 
 
 // Conectar con la base de datos
