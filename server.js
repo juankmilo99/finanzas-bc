@@ -17,21 +17,24 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middlewares
-app.use(cors());
-app.use(express.json()); // Para manejar datos JSON
 
-// Usar rutas de usuarios
-app.use('/api/users', userRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/transactions', transactionRoutes);
-app.use('/api/budgets', budgetRoutes);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(express.json()); // Para manejar datos JSON
 app.use(cors({
   origin: ["http://localhost:3000", "https://tu-dominio-en-produccion.com"], // Permitir solo estos dominios
   credentials: true, // 🔥 Permitir cookies y headers de autenticación
   methods: ["GET", "POST", "PUT", "DELETE"], // Métodos permitidos
   allowedHeaders: ["Content-Type", "Authorization"], // Headers permitidos
 }));
+
+
+// Usar rutas de usuarios
+
+app.use('/api/users', userRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/budgets', budgetRoutes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 
 
 // Conectar con la base de datos
