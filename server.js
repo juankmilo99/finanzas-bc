@@ -23,7 +23,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json()); // Para manejar datos JSON
 app.use(cors({
-  origin: ["http://localhost:3000", "https://financezaar.netlify.app/"], // Permitir solo estos dominios
+  origin: ["http://localhost:3000", "https://financezaar.netlify.app"], // Permitir solo estos dominios
   credentials: true, // 🔥 Permitir cookies y headers de autenticación
   methods: ["GET", "POST", "PUT", "DELETE"], // Métodos permitidos
   allowedHeaders: ["Content-Type", "Authorization"], // Headers permitidos
