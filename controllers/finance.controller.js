@@ -1,4 +1,5 @@
 const Transaction = require('../models/transaction.model');
+const Category = require('../models/category.model');
 
 exports.getBalance = async (req, res) => {
     try {
@@ -6,12 +7,26 @@ exports.getBalance = async (req, res) => {
 
         // Calcular ingresos totales
         const totalIncome = await Transaction.sum('amount', {
-            where: { user_id, type: 'income' }
+            where: {
+                user_id,
+                '$Category.type$': 'income'
+            },
+            include: [{
+                model: Category,
+                attributes: []
+            }]
         });
 
         // Calcular gastos totales
         const totalExpenses = await Transaction.sum('amount', {
-            where: { user_id, type: 'expense' }
+            where: {
+                user_id,
+                '$Category.type$': 'expense'
+            },
+            include: [{
+                model: Category,
+                attributes: []
+            }]
         });
 
         // Balance general
@@ -33,29 +48,71 @@ exports.getSummary = async (req, res) => {
 
         // Obtener ingresos y gastos totales
         const totalIncome = await Transaction.sum('amount', {
-            where: { user_id, type: 'income' }
+            where: {
+                user_id,
+                '$Category.type$': 'income'
+            },
+            include: [{
+                model: Category,
+                attributes: []
+            }]
         });
 
         const totalExpenses = await Transaction.sum('amount', {
-            where: { user_id, type: 'expense' }
+            where: {
+                user_id,
+                '$Category.type$': 'expense'
+            },
+            include: [{
+                model: Category,
+                attributes: []
+            }]
         });
 
         // Obtener ingreso y gasto más alto
         const highestIncome = await Transaction.max('amount', {
-            where: { user_id, type: 'income' }
+            where: {
+                user_id,
+                '$Category.type$': 'income'
+            },
+            include: [{
+                model: Category,
+                attributes: []
+            }]
         });
 
         const highestExpense = await Transaction.max('amount', {
-            where: { user_id, type: 'expense' }
+            where: {
+                user_id,
+                '$Category.type$': 'expense'
+            },
+            include: [{
+                model: Category,
+                attributes: []
+            }]
         });
 
         // Calcular promedios
         const incomeCount = await Transaction.count({
-            where: { user_id, type: 'income' }
+            where: {
+                user_id,
+                '$Category.type$': 'income'
+            },
+            include: [{
+                model: Category,
+                attributes: []
+            }]
         });
 
         const expenseCount = await Transaction.count({
-            where: { user_id, type: 'expense' }
+            where: {
+                user_id,
+                '$Category.type$': 'expense'
+            },
+            include: [{
+                model: Category,
+                attributes: []
+            }]
         });
 
         const averageIncome = incomeCount ? totalIncome / incomeCount : 0;
@@ -74,4 +131,3 @@ exports.getSummary = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
