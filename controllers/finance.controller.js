@@ -1,5 +1,6 @@
 const Transaction = require('../models/transaction.model');
 const Category = require('../models/category.model');
+const { Op, fn, col, literal } = require('sequelize');
 
 exports.getBalance = async (req, res) => {
     try {
@@ -46,8 +47,13 @@ exports.getSummary = async (req, res) => {
     try {
         const user_id = req.user.id;
 
-        // Obtener ingresos y gastos totales
-        const totalIncome = await Transaction.sum('amount', {
+        // Obtener ingresos agrupados por año y mes
+        const incomeByMonth = await Transaction.findAll({
+            attributes: [
+                [fn('EXTRACT', literal('YEAR FROM transaction_date')), 'year'],
+                [fn('TO_CHAR', col('transaction_date'), 'YYYY-MM'), 'month'],
+                [fn('SUM', col('amount')), 'income']
+            ],
             where: {
                 user_id,
                 '$Category.type$': 'income'
@@ -55,10 +61,18 @@ exports.getSummary = async (req, res) => {
             include: [{
                 model: Category,
                 attributes: []
-            }]
+            }],
+            group: [literal('year'), literal('month')],
+            order: [literal('year'), literal('month')]
         });
 
-        const totalExpenses = await Transaction.sum('amount', {
+        // Obtener gastos agrupados por año y mes
+        const expenseByMonth = await Transaction.findAll({
+            attributes: [
+                [fn('EXTRACT', literal('YEAR FROM transaction_date')), 'year'],
+                [fn('TO_CHAR', col('transaction_date'), 'YYYY-MM'), 'month'],
+                [fn('SUM', col('amount')), 'expense']
+            ],
             where: {
                 user_id,
                 '$Category.type$': 'expense'
@@ -66,67 +80,28 @@ exports.getSummary = async (req, res) => {
             include: [{
                 model: Category,
                 attributes: []
-            }]
+            }],
+            group: [literal('year'), literal('month')],
+            order: [literal('year'), literal('month')]
         });
 
-        // Obtener ingreso y gasto más alto
-        const highestIncome = await Transaction.max('amount', {
-            where: {
-                user_id,
-                '$Category.type$': 'income'
-            },
-            include: [{
-                model: Category,
-                attributes: []
-            }]
+        // Combinar ingresos y gastos por mes
+        const summary = incomeByMonth.map(income => {
+            const year = income.get('year');
+            let month = income.get('month');
+            // Ajustar manualmente el mes
+            const [yearStr, monthStr] = month.split('-');
+            const adjustedMonth = new Date(yearStr, parseInt(monthStr) - 1, 1).toLocaleString('es-ES', { month: 'long' });
+            const expense = expenseByMonth.find(exp => exp.get('year') === year && exp.get('month') === month);
+            return {
+                year: year,
+                month: adjustedMonth,
+                income: parseFloat(income.get('income')),
+                expense: expense ? parseFloat(expense.get('expense')) : 0
+            };
         });
 
-        const highestExpense = await Transaction.max('amount', {
-            where: {
-                user_id,
-                '$Category.type$': 'expense'
-            },
-            include: [{
-                model: Category,
-                attributes: []
-            }]
-        });
-
-        // Calcular promedios
-        const incomeCount = await Transaction.count({
-            where: {
-                user_id,
-                '$Category.type$': 'income'
-            },
-            include: [{
-                model: Category,
-                attributes: []
-            }]
-        });
-
-        const expenseCount = await Transaction.count({
-            where: {
-                user_id,
-                '$Category.type$': 'expense'
-            },
-            include: [{
-                model: Category,
-                attributes: []
-            }]
-        });
-
-        const averageIncome = incomeCount ? totalIncome / incomeCount : 0;
-        const averageExpense = expenseCount ? totalExpenses / expenseCount : 0;
-
-        res.status(200).json({
-            totalIncome: totalIncome || 0,
-            totalExpenses: totalExpenses || 0,
-            balance: (totalIncome || 0) - (totalExpenses || 0),
-            highestIncome: highestIncome || 0,
-            highestExpense: highestExpense || 0,
-            averageIncome: parseFloat(averageIncome.toFixed(2)),
-            averageExpense: parseFloat(averageExpense.toFixed(2))
-        });
+        res.status(200).json(summary);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
