@@ -35,7 +35,7 @@ exports.getAllGoals = async (req, res) => {
 exports.getGoalById = async (req, res) => {
     try {
         // Verificar si el usuario tiene el rol de administrador
-        if (req.user.role !== 'admin') {
+        if (goal.user_id !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Acceso denegado, solo los administradores pueden ver esta meta' });
         }
 
