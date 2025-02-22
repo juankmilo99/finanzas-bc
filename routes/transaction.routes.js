@@ -28,6 +28,23 @@ router.get('/user', authMiddleware, transactionController.getTransactionsByUserI
 
 /**
  * @swagger
+ * /transactions/recent:
+ *   get:
+ *     summary: Get the 5 most recent transactions for the authenticated user
+ *     tags: [Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of recent transactions
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/recent', authMiddleware, transactionController.getRecentTransactions);
+
+
+/**
+ * @swagger
  * /transactions:
  *   get:
  *     summary: Get all transactions

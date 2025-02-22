@@ -1,13 +1,15 @@
 const Transaction = require('../models/transaction.model');
+const Category = require('../models/category.model');
+
 
 // controllers/transaction.controller.js
 
 // Create a new transaction
 exports.createTransaction = async (req, res) => {
     try {
-        const { amount, description, category_id, type, transaction_date } = req.body;
+        const { amount, description, category_id, transaction_date } = req.body;
         const user_id = req.user.id; // Obtener el user_id del token JWT
-        const transaction = await Transaction.create({ amount, description, category_id, user_id, type, transaction_date });
+        const transaction = await Transaction.create({ amount, description, category_id, user_id, transaction_date });
         res.status(201).json(transaction);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -44,6 +46,24 @@ exports.getTransactionById = async (req, res) => {
     }
 };
 
+exports.getRecentTransactions = async (req, res) => {
+    try {
+        const user_id = req.user.id;
+
+        const recentTransactions = await Transaction.findAll({
+            where: { user_id },
+            order: [['transaction_date', 'DESC']], // Ordenar por fecha descendente
+            limit: 5, // Mostrar solo las últimas 5 transacciones
+            include: [{ model: Category, attributes: ['name', 'type'] }]
+        });
+
+        res.status(200).json(recentTransactions);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 exports.getTransactionsByUserId = async (req, res) => {
     try {
         const user_id = req.user.id; // Obtener el user_id del token JWT
@@ -63,7 +83,7 @@ exports.getTransactionsByUserId = async (req, res) => {
 exports.updateTransaction = async (req, res) => {
     try {
         const { id } = req.params;
-        const { amount, description, category_id, type, transaction_date } = req.body;
+        const { amount, description, category_id, transaction_date } = req.body;
 
         const transaction = await Transaction.findByPk(id);
 
@@ -78,8 +98,7 @@ exports.updateTransaction = async (req, res) => {
 
         transaction.amount = amount;
         transaction.description = description;
-        transaction.category_id = category_id;
-        transaction.type = type;
+        transaction.category_id = category_id;       
         transaction.transaction_date = transaction_date;
 
         await transaction.save();
@@ -111,3 +130,4 @@ exports.deleteTransaction = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+

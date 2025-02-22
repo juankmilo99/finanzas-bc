@@ -10,6 +10,9 @@ const userRoutes = require('./routes/user.routes');
 const categoryRoutes = require('./routes/category.routes');
 const transactionRoutes = require('./routes/transaction.routes');
 const budgetRoutes = require('./routes/budget.routes');
+const financeRoutes = require('./routes/finance.routes');
+const metricsRoutes = require('./routes/metrics.routes');
+const goalRoutes = require('./routes/goal.routes');
 
 dotenv.config();
 
@@ -33,7 +36,11 @@ app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/budgets', budgetRoutes);
+app.use('/api/finances', financeRoutes);
+app.use('/api/metrics', metricsRoutes);
+app.use('/api/goals', goalRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 
 
 

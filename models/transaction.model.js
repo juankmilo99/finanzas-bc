@@ -1,7 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db.config');
-const Category = require('./category.model'); // Relación con la categoría
+const Category = require('./category.model');
 const User = require('./user.model');
+
 
 const Transaction = sequelize.define('Transaction', {
   id: {
@@ -16,7 +17,7 @@ const Transaction = sequelize.define('Transaction', {
   description: {
     type: DataTypes.STRING,
     allowNull: true,
-  },  
+  },
   category_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -33,10 +34,6 @@ const Transaction = sequelize.define('Transaction', {
       key: 'id',
     },
   },
-  type: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
   transaction_date: {
     type: DataTypes.DATE,
     allowNull: false,
@@ -46,11 +43,12 @@ const Transaction = sequelize.define('Transaction', {
     defaultValue: DataTypes.NOW,
   },
 }, {
-  
   timestamps: false,
-  tableName: 'transactions' // Asegúrate de que el nombre de la tabla sea correcto
+  tableName: 'transactions'
 });
 
-Transaction.belongsTo(Category, { foreignKey: 'category_id' }); // Relación con Category
+// Relación con Category para obtener el type desde ahí
+Transaction.belongsTo(Category, { foreignKey: 'category_id' });
 Transaction.belongsTo(User, { foreignKey: 'user_id' });
+
 module.exports = Transaction;
